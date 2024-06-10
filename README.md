@@ -7,10 +7,12 @@ personal financial tracker tools. input cashflow, show cashflow on table. tools 
 - [ ] auth
   - [ ] register
   - [ ] login
-- [ ] input cashflow: amount, date, category, notes
-- [ ] edit cashflow: amount, category, notes
-- [ ] get cashflow: by date, by month
-- [ ] get outflow, inflow: by month, by category, by quarter
+  - [ ] get user
+- [ ] transactions
+  - [ ] input cashflow: amount, date, category, notes
+  - [ ] edit cashflow: amount, category, notes
+  - [ ] get cashflow: by date, by month
+  - [ ] get outflow, inflow: by month, by category, by quarter
 
 ## Endpoints:
 
@@ -18,7 +20,9 @@ personal financial tracker tools. input cashflow, show cashflow on table. tools 
 - POST auth - login user
 - POST input cashflow
 - PUT edit cashflow
+- DELETE transaction
 - GET cashflow, params: date, month, category (?)
+- GET Summary and Reports by date-range (months, quarter)
 
 ## Development:
 
