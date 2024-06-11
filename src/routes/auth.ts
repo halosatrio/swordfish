@@ -1,5 +1,9 @@
 import { Hono } from "hono";
 
+// TODO:
+// - register: handle payload, validate, hash password
+// - login: handle payload, validate, generate JWT
+
 export const authRoutes = new Hono()
   .post("/register", async (c) => {
     return c.json({

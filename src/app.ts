@@ -7,8 +7,12 @@ const app = new Hono();
 app.use("*", logger());
 
 app.basePath("/v1").route("/auth", authRoutes);
+// TODO:
+// transaction Routes
+// report Routes
+// setup cors
 
-app.get("/test", (c) => {
+app.get("/v1/test", (c) => {
   return c.text("Welcome to swordfish, Spike!");
 });
 
