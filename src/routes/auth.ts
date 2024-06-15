@@ -35,7 +35,11 @@ export const authRoutes = new Hono()
 
       let res = await db
         .insert(usersTable)
-        .values({ email: body.email, password: bcryptHash })
+        .values({
+          username: body.username,
+          email: body.email,
+          password: bcryptHash,
+        })
         .returning()
         .then((res) => res[0]);
 

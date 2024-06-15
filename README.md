@@ -39,3 +39,10 @@ bun run dev
 ```
 
 open http://localhost:3000
+
+## DB related
+
+if we make some changes in schema:
+
+- generate with `bunx drizzle-kit generate:pg`
+- migrate with `bun migrate.ts`
