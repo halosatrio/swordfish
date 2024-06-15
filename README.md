@@ -5,8 +5,8 @@ personal financial tracker tools. input cashflow, show cashflow on table. tools 
 ## TODO:
 
 - [ ] auth
-  - [ ] register
-  - [ ] login
+  - [x] register
+  - [x] login
   - [ ] get user
 - [ ] transactions
   - [ ] input cashflow: amount, date, category, notes
