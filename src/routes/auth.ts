@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { sign } from "hono/jwt";
-import { userValidationSchema as userValidation } from "../validationSchema";
+import {
+  loginUserValidation,
+  userValidationSchema as userValidation,
+} from "../validationSchema";
 import { zValidator } from "@hono/zod-validator";
 import { db } from "../db";
 import { usersTable } from "../db/schema";
@@ -52,7 +55,7 @@ export const authRoutes = new Hono()
   )
   .post(
     "/login",
-    zValidator("json", userValidation, (res, c) => {
+    zValidator("json", loginUserValidation, (res, c) => {
       if (!res.success) {
         return c.json(
           {

@@ -1,15 +1,10 @@
 import {
   text,
-  index,
   timestamp,
   date,
-  boolean,
-  integer,
   pgSchema,
-  smallint,
   serial,
-  varchar,
-  primaryKey,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 export const mySchema = pgSchema("swordfish");
@@ -19,6 +14,20 @@ export const usersTable = mySchema.table("users", {
   username: text("username").notNull(),
   email: text("email").unique().notNull(),
   password: text("password").notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const transactionsTable = mySchema.table("transactions", {
+  id: serial("id").primaryKey(),
+  user_id: serial("user_id")
+    .references(() => usersTable.id)
+    .notNull(),
+  type: text("type").notNull(), // 'inflow' or 'outflow'
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  category: text("category").notNull(), // Will be validated in application code
+  date: date("date").notNull(),
+  note: text("note"),
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),
 });
