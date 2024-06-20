@@ -17,11 +17,12 @@ export const authRoutes = new Hono()
     "/register",
     zValidator("json", userValidation, (res, c) => {
       if (!res.success) {
+        console.log(res.error);
         return c.json(
           {
             status: 400,
             message: `Failed register user! [Errors]:${res.error.issues.map(
-              (item) => " " + item.message
+              (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
           400
@@ -61,7 +62,7 @@ export const authRoutes = new Hono()
           {
             status: 400,
             message: `Login failed! [Errors]: ${res.error.issues.map(
-              (item) => " " + item.message
+              (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
           400
