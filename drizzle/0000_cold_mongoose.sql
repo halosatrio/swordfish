@@ -2,7 +2,7 @@ CREATE SCHEMA "swordfish";
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "swordfish"."transactions" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" serial NOT NULL,
+	"user_id" integer NOT NULL,
 	"type" text NOT NULL,
 	"amount" numeric(10, 2) NOT NULL,
 	"category" text NOT NULL,

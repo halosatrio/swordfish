@@ -5,6 +5,7 @@ import {
   pgSchema,
   serial,
   numeric,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export const mySchema = pgSchema("swordfish");
@@ -20,7 +21,7 @@ export const usersTable = mySchema.table("users", {
 
 export const transactionsTable = mySchema.table("transactions", {
   id: serial("id").primaryKey(),
-  user_id: serial("user_id")
+  user_id: integer("user_id")
     .references(() => usersTable.id)
     .notNull(),
   type: text("type").notNull(), // 'inflow' or 'outflow'
