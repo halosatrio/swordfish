@@ -8,6 +8,8 @@ import { zValidator } from "@hono/zod-validator";
 import { db } from "@db/index";
 import { usersTable } from "@db/schema";
 import { eq } from "drizzle-orm";
+import { jwtMiddleware } from "@utils/jwtMiddleware";
+import type { JwtPayloadType } from "@lib/common";
 
 // TODO:
 // get user -> get jwt from auth header -> decrypt -> get email
@@ -104,10 +106,24 @@ export const authRoutes = new Hono()
       } else c.json({ status: 500, data: "email is not found!" }, 500);
     }
   )
-  .get("/user", async (c) => {
+  .get("/user", jwtMiddleware, async (c) => {
+    const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+
+    const user = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, jwtPayload.email))
+      .then((res) => res[0]);
+
     return c.json({
       status: 200,
       message: "Success!",
-      data: "user data",
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      },
     });
   });

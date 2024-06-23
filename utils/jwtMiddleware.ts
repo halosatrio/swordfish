@@ -1,6 +1,6 @@
 import { verify } from "hono/jwt";
-import type { JwtPayloadType } from "../types/common";
 import { createMiddleware } from "hono/factory";
+import type { JWTPayload } from "hono/utils/jwt/types";
 
 export const jwtMiddleware = createMiddleware(async (c, next) => {
   try {
@@ -32,7 +32,7 @@ export const jwtMiddleware = createMiddleware(async (c, next) => {
         500
       );
 
-    const jwtPayload: JwtPayloadType = await verify(token, jwtSecret);
+    const jwtPayload: JWTPayload = await verify(token, jwtSecret);
     c.set("jwtPayload", jwtPayload);
     return next();
   } catch (error: any) {
