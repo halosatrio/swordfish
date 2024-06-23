@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { authRoutes } from "./routes/auth";
-import { transactionRoutes } from "./routes/transaction";
+import { authRoutes } from "@routes/auth";
+import { transactionRoutes } from "@routes/transaction";
 
 const app = new Hono();
 

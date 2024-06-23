@@ -3,10 +3,10 @@ import { sign } from "hono/jwt";
 import {
   loginUserValidation,
   userValidationSchema as userValidation,
-} from "../validationSchema";
+} from "@utils/validationSchema";
 import { zValidator } from "@hono/zod-validator";
-import { db } from "../db";
-import { usersTable } from "../db/schema";
+import { db } from "@db/index";
+import { usersTable } from "@db/schema";
 import { eq } from "drizzle-orm";
 
 // TODO:
