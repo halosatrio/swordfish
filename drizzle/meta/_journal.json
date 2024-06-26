@@ -8,6 +8,13 @@
       "when": 1719126494706,
       "tag": "0000_cold_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1719422298420,
+      "tag": "0001_normal_cloak",
+      "breakpoints": true
     }
   ]
 }

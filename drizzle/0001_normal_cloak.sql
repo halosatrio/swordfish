@@ -1,0 +1,1 @@
+ALTER TABLE "swordfish"."transactions" ALTER COLUMN "amount" SET DATA TYPE integer;

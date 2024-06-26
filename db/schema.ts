@@ -25,7 +25,7 @@ export const transactionsTable = mySchema.table("transactions", {
     .references(() => usersTable.id)
     .notNull(),
   type: text("type").notNull(), // 'inflow' or 'outflow'
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: integer("amount").notNull(),
   category: text("category").notNull(), // Will be validated in application code
   date: date("date").notNull(),
   note: text("note"),
