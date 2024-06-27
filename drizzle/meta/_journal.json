@@ -15,6 +15,13 @@
       "when": 1719422298420,
       "tag": "0001_normal_cloak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1719454319745,
+      "tag": "0002_volatile_chameleon",
+      "breakpoints": true
     }
   ]
 }

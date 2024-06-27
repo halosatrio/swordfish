@@ -6,6 +6,7 @@ import {
   serial,
   numeric,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const mySchema = pgSchema("swordfish");
@@ -29,6 +30,7 @@ export const transactionsTable = mySchema.table("transactions", {
   category: text("category").notNull(), // Will be validated in application code
   date: date("date").notNull(),
   note: text("note"),
+  is_active: boolean("is_active").default(true),
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),
 });
