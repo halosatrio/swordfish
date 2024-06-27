@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import type { JwtPayloadType } from "@lib/common";
 import { jwtMiddleware } from "@utils/jwtMiddleware";
 import { transactionValidationSchema as transactionValidation } from "@utils/validationSchema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 
 // TODO:
@@ -71,21 +71,104 @@ transactionRoutes
       });
     }
   )
-  .put("/", async (c) => {
-    // TODO:
-    // add endpoint /:id. PUT by transaction id
+  .put(
+    "/:id{[0-9]+}",
+    zValidator("json", transactionValidation, (result, c) => {
+      if (!result.success) {
+        return c.json(
+          {
+            status: 400,
+            message: `Failed register user! [Errors]:${result.error.issues.map(
+              (item) => ` ${item.path[0]} ${item.message}`
+            )}`,
+          },
+          400
+        );
+      }
+    }),
+    async (c) => {
+      const id = Number.parseInt(c.req.param("id"));
+      const body = c.req.valid("json");
+      const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+
+      const existingTransaction = await db
+        .select()
+        .from(transactionsTable)
+        .where(
+          and(
+            eq(transactionsTable.user_id, jwtPayload.sub),
+            eq(transactionsTable.id, id),
+            eq(transactionsTable.is_active, true)
+          )
+        );
+
+      if (existingTransaction.length < 1) {
+        return c.json({ status: 404, message: "Habit not found!" }, 404);
+      }
+
+      const updatedTransaction = await db
+        .update(transactionsTable)
+        .set({
+          type: body.type,
+          amount: body.amount,
+          category: body.category,
+          date: body.date, // Convert date string to Date object
+          note: body.note,
+          updated_at: new Date(),
+        })
+        .where(
+          and(
+            eq(transactionsTable.user_id, jwtPayload.sub),
+            eq(transactionsTable.id, id)
+          )
+        )
+        .returning()
+        .then((res) => res[0]);
+
+      return c.json({
+        status: 200,
+        message: "Success update transaction!",
+        data: updatedTransaction,
+      });
+    }
+  )
+  .delete("/:id{[0-9]+}", async (c) => {
+    const id = Number.parseInt(c.req.param("id"));
+    const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+
+    const existingTransaction = await db
+      .select()
+      .from(transactionsTable)
+      .where(
+        and(
+          eq(transactionsTable.user_id, jwtPayload.sub),
+          eq(transactionsTable.id, id),
+          eq(transactionsTable.is_active, true)
+        )
+      );
+
+    if (existingTransaction.length < 1) {
+      return c.json({ status: 404, message: "Habit not found!" }, 404);
+    }
+
+    const deleteTransaction = await db
+      .update(transactionsTable)
+      .set({
+        is_active: false,
+        updated_at: new Date(),
+      })
+      .where(
+        and(
+          eq(transactionsTable.user_id, jwtPayload.sub),
+          eq(transactionsTable.id, id)
+        )
+      )
+      .returning()
+      .then((res) => res[0]);
+
     return c.json({
       status: 200,
-      message: "Success!",
-      data: "Success update transaction",
-    });
-  })
-  .delete("/", async (c) => {
-    // TODO:
-    // add endpoint /:id. DELETE by transaction id
-    return c.json({
-      status: 200,
-      message: "Success!",
-      data: "Success delete transaction",
+      message: "Success delete transaction!",
+      data: deleteTransaction,
     });
   });
