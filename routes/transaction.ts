@@ -22,7 +22,12 @@ transactionRoutes
     const transactions = await db
       .select()
       .from(transactionsTable)
-      .where(eq(transactionsTable.user_id, jwtPayload.sub));
+      .where(
+        and(
+          eq(transactionsTable.user_id, jwtPayload.sub),
+          eq(transactionsTable.is_active, true)
+        )
+      );
 
     return c.json({
       status: 200,
