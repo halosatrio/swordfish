@@ -62,7 +62,7 @@ transactionRoutes
           amount: body.amount,
           category: body.category,
           date: body.date, // Convert date string to Date object
-          note: body.note,
+          notes: body.notes,
           created_at: new Date(),
           updated_at: new Date(),
         })
@@ -118,7 +118,7 @@ transactionRoutes
           amount: body.amount,
           category: body.category,
           date: body.date, // Convert date string to Date object
-          note: body.note,
+          notes: body.notes,
           updated_at: new Date(),
         })
         .where(

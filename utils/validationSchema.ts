@@ -20,7 +20,7 @@ export const transactionValidationSchema = z.object({
   amount: z.number().positive(),
   category: z.nativeEnum(CATEGORIES),
   date: z.string().date(),
-  note: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 // export type Transaction = z.infer<typeof transactionValidationSchema>;

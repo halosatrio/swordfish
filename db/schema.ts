@@ -29,7 +29,7 @@ export const transactionsTable = mySchema.table("transactions", {
   amount: integer("amount").notNull(),
   category: text("category").notNull(), // Will be validated in application code
   date: date("date").notNull(),
-  note: text("note"),
+  notes: text("notes"),
   is_active: boolean("is_active").default(true),
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),

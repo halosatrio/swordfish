@@ -22,6 +22,13 @@
       "when": 1719454319745,
       "tag": "0002_volatile_chameleon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1720720367565,
+      "tag": "0003_stormy_caretaker",
+      "breakpoints": true
     }
   ]
 }
