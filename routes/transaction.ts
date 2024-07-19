@@ -3,8 +3,11 @@ import { transactionsTable } from "@db/schema";
 import { zValidator } from "@hono/zod-validator";
 import type { JwtPayloadType } from "@lib/common";
 import { jwtMiddleware } from "@utils/jwtMiddleware";
-import { transactionValidationSchema as transactionValidation } from "@utils/validationSchema";
-import { and, eq } from "drizzle-orm";
+import {
+  transactionValidationSchema as transactionValidation,
+  transactionQueryValidationSchema as transactionQuery,
+} from "@utils/validationSchema";
+import { and, between, eq } from "drizzle-orm";
 import { Hono } from "hono";
 
 // TODO:
@@ -13,28 +16,47 @@ export const transactionRoutes = new Hono();
 transactionRoutes.use(jwtMiddleware);
 
 transactionRoutes
-  .get("/", async (c) => {
-    // TODO:
-    // query params limit, date: start & end, category,
-    // do i need to add is_active to transaction (?)
-    const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+  .get(
+    "/",
+    zValidator("query", transactionQuery, (result, c) => {
+      if (!result.success) {
+        return c.json(
+          {
+            status: 400,
+            message: `Failed get transaction! [Errors]:${result.error.issues.map(
+              (item) => ` ${item.path[0]} ${item.message}`
+            )}`,
+          },
+          400
+        );
+      }
+    }),
+    async (c) => {
+      const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+      const { date_start, date_end, category } = c.req.query();
 
-    const transactions = await db
-      .select()
-      .from(transactionsTable)
-      .where(
-        and(
-          eq(transactionsTable.user_id, jwtPayload.sub),
-          eq(transactionsTable.is_active, true)
+      const transactions = await db
+        .select()
+        .from(transactionsTable)
+        .where(
+          and(
+            eq(transactionsTable.user_id, jwtPayload.sub),
+            eq(transactionsTable.is_active, true),
+            category ? eq(transactionsTable.category, category) : undefined,
+            date_start && date_end
+              ? between(transactionsTable.date, date_start, date_end)
+              : undefined
+          )
         )
-      );
+        .limit(200); // max transaction record per month is around 150ish
 
-    return c.json({
-      status: 200,
-      message: "Success!",
-      data: transactions,
-    });
-  })
+      return c.json({
+        status: 200,
+        message: "Success!",
+        data: transactions,
+      });
+    }
+  )
   .post(
     "/create",
     zValidator("json", transactionValidation, (result, c) => {
@@ -42,7 +64,7 @@ transactionRoutes
         return c.json(
           {
             status: 400,
-            message: `Failed register user! [Errors]:${result.error.issues.map(
+            message: `Failed record transaction! [Errors]:${result.error.issues.map(
               (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
@@ -83,7 +105,7 @@ transactionRoutes
         return c.json(
           {
             status: 400,
-            message: `Failed register user! [Errors]:${result.error.issues.map(
+            message: `Failed update transaction! [Errors]:${result.error.issues.map(
               (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },

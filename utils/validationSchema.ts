@@ -24,3 +24,9 @@ export const transactionValidationSchema = z.object({
 });
 
 // export type Transaction = z.infer<typeof transactionValidationSchema>;
+
+export const transactionQueryValidationSchema = z.object({
+  date_start: z.string().date().optional(),
+  date_end: z.string().date().optional(),
+  category: z.nativeEnum(CATEGORIES).optional(),
+});
