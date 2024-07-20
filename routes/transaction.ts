@@ -7,7 +7,7 @@ import {
   transactionValidationSchema as transactionValidation,
   transactionQueryValidationSchema as transactionQuery,
 } from "@utils/validationSchema";
-import { and, between, eq } from "drizzle-orm";
+import { and, between, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 
 // TODO:
@@ -38,6 +38,7 @@ transactionRoutes
       const transactions = await db
         .select()
         .from(transactionsTable)
+        .orderBy(desc(transactionsTable.date))
         .where(
           and(
             eq(transactionsTable.user_id, jwtPayload.sub),
