@@ -46,3 +46,9 @@ if we make some changes in schema:
 
 - generate with `bunx drizzle-kit generate:pg`
 - migrate with `bun migrate.ts`
+
+## Running Docker
+
+```sh
+docker run -d -p 3000:3000 --env-file ./.env [container-name]
+```
