@@ -4,14 +4,14 @@ personal financial tracker tools. input cashflow, show cashflow on table. tools 
 
 ## TODO:
 
-- [ ] auth
+- [x] auth
   - [x] register
   - [x] login
-  - [ ] get user
-- [ ] transactions
-  - [ ] input cashflow: amount, date, category, notes
+  - [x] get user
+- [x] transactions
+  - [x] input cashflow: amount, date, category, notes
   - [ ] edit cashflow: amount, category, notes
-  - [ ] get cashflow: by date, by month
+  - [x] get cashflow: by date, by month
   - [ ] get outflow, inflow: by month, by category, by quarter
 
 ## Endpoints:

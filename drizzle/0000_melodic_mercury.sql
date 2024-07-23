@@ -4,10 +4,11 @@ CREATE TABLE IF NOT EXISTS "swordfish"."transactions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"type" text NOT NULL,
-	"amount" numeric(10, 2) NOT NULL,
+	"amount" integer NOT NULL,
 	"category" text NOT NULL,
 	"date" date NOT NULL,
-	"note" text,
+	"notes" text,
+	"is_active" boolean DEFAULT true,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );

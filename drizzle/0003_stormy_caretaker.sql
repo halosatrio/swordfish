@@ -1,1 +1,0 @@
-ALTER TABLE "swordfish"."transactions" RENAME COLUMN "note" TO "notes";

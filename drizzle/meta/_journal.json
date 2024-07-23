@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1719126494706,
-      "tag": "0000_cold_mongoose",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1719422298420,
-      "tag": "0001_normal_cloak",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1719454319745,
-      "tag": "0002_volatile_chameleon",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1720720367565,
-      "tag": "0003_stormy_caretaker",
+      "when": 1721700275877,
+      "tag": "0000_melodic_mercury",
       "breakpoints": true
     }
   ]
