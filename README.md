@@ -50,5 +50,7 @@ if we make some changes in schema:
 ## Running Docker
 
 ```sh
+docker build -t halosatrio/swordfish:v1 .
+
 docker run -d -p 3000:3000 --env-file ./.env [container-name]
 ```
