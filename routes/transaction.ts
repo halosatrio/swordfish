@@ -224,6 +224,7 @@ transactionRoutes
         .select({
           category: transactionsTable.category,
           total_amount: sql<number>`cast(sum(${transactionsTable.amount}) as int)`,
+          count: sql<number>`cast(count(${transactionsTable.id}) as int)`,
         })
         .from(transactionsTable)
         .where(
