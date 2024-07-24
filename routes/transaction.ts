@@ -5,9 +5,10 @@ import type { JwtPayloadType } from "@lib/common";
 import { jwtMiddleware } from "@utils/jwtMiddleware";
 import {
   transactionValidationSchema as transactionValidation,
-  transactionQueryValidationSchema as transactionQuery,
+  transactionQuerySchema,
+  monthlySummaryQuerySchema,
 } from "@utils/validationSchema";
-import { and, asc, between, eq } from "drizzle-orm";
+import { and, asc, between, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 
 // TODO:
@@ -18,7 +19,7 @@ transactionRoutes.use(jwtMiddleware);
 transactionRoutes
   .get(
     "/",
-    zValidator("query", transactionQuery, (result, c) => {
+    zValidator("query", transactionQuerySchema, (result, c) => {
       if (!result.success) {
         return c.json(
           {
@@ -106,7 +107,7 @@ transactionRoutes
         return c.json(
           {
             status: 400,
-            message: `Failed update transaction! [Errors]:${result.error.issues.map(
+            message: `Failed update transaction! [Errors - query params]:${result.error.issues.map(
               (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
@@ -199,4 +200,47 @@ transactionRoutes
       message: "Success delete transaction!",
       data: deleteTransaction,
     });
-  });
+  })
+  .get(
+    "/monthly-summary",
+    zValidator("query", monthlySummaryQuerySchema, (result, c) => {
+      if (!result.success) {
+        return c.json(
+          {
+            status: 400,
+            message: `Failed get transaction - monthly summary! [Errors - query params]:${result.error.issues.map(
+              (item) => ` ${item.path[0]} ${item.message}`
+            )}`,
+          },
+          400
+        );
+      }
+    }),
+    async (c) => {
+      const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+      const { date_start, date_end, category } = c.req.query();
+
+      const transactions = await db
+        .select({
+          category: transactionsTable.category,
+          total_amount: sql<number>`cast(sum(${transactionsTable.amount}) as int)`,
+        })
+        .from(transactionsTable)
+        .where(
+          and(
+            eq(transactionsTable.user_id, jwtPayload.sub),
+            eq(transactionsTable.is_active, true),
+            date_start && date_end
+              ? between(transactionsTable.date, date_start, date_end)
+              : undefined
+          )
+        )
+        .groupBy(transactionsTable.category);
+
+      return c.json({
+        status: 200,
+        message: "Success!",
+        data: transactions,
+      });
+    }
+  );
