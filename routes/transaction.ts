@@ -218,9 +218,9 @@ transactionRoutes
     }),
     async (c) => {
       const jwtPayload: JwtPayloadType = c.get("jwtPayload");
-      const { date_start, date_end, category } = c.req.query();
+      const { date_start, date_end } = c.req.query();
 
-      const transactions = await db
+      const monthlySummary = await db
         .select({
           category: transactionsTable.category,
           total_amount: sql<number>`cast(sum(${transactionsTable.amount}) as int)`,
@@ -238,10 +238,38 @@ transactionRoutes
         )
         .groupBy(transactionsTable.category);
 
+      const monthlycashflow = await db
+        .select({
+          type: transactionsTable.type,
+          amount: sql<number>`cast(sum(${transactionsTable.amount}) as int)`,
+        })
+        .from(transactionsTable)
+        .where(
+          and(
+            eq(transactionsTable.user_id, jwtPayload.sub),
+            eq(transactionsTable.is_active, true),
+            date_start && date_end
+              ? between(transactionsTable.date, date_start, date_end)
+              : undefined
+          )
+        )
+        .groupBy(transactionsTable.type);
+
+      let cashflowData = monthlycashflow.reduce(
+        (acc: { [key: string]: number }, item) => {
+          acc[item.type] = item.amount;
+          return acc;
+        },
+        {}
+      );
+
       return c.json({
         status: 200,
         message: "Success!",
-        data: transactions,
+        data: {
+          cashflow: cashflowData,
+          summary: monthlySummary,
+        },
       });
     }
   );
