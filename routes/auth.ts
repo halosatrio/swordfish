@@ -94,7 +94,7 @@ export const authRoutes = new Hono()
         const tokenPayload = {
           sub: user[0].id,
           email: body.email,
-          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // Token expires in 24 hours
+          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // Token expires in 7 days
         };
         const token = await sign(tokenPayload, secret!);
 

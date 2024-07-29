@@ -11,8 +11,6 @@ import {
 import { and, asc, between, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 
-// TODO:
-
 export const transactionRoutes = new Hono();
 transactionRoutes.use(jwtMiddleware);
 
@@ -267,7 +265,7 @@ transactionRoutes
         status: 200,
         message: "Success!",
         data: {
-          cashflow: cashflowData,
+          cashflow: monthlycashflow.length === 0 ? null : cashflowData,
           summary: monthlySummary,
         },
       });
