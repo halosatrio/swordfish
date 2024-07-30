@@ -12,7 +12,7 @@ app.use(
   "*",
   cors({
     origin: ["http://localhost:5173"],
-  })
+  }),
 );
 
 app
@@ -20,9 +20,8 @@ app
   .route("/auth", authRoutes)
   .route("/transaction", transactionRoutes);
 // TODO:
-// transaction Routes
 // report Routes
-// setup cors
+// assets Routes
 
 app.get("/v1/test", (c) => {
   return c.text("Welcome to swordfish, Spike!");
