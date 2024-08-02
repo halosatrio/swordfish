@@ -13,6 +13,8 @@ personal financial tracker tools. input cashflow, show cashflow on table. tools 
   - [ ] edit cashflow: amount, category, notes
   - [x] get cashflow: by date, by month
   - [ ] get outflow, inflow: by month, by category, by quarter
+- [ ] advance
+  - [ ] cookie based token
 
 ## Endpoints:
 
