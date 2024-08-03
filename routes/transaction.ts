@@ -23,10 +23,10 @@ transactionRoutes
           {
             status: 400,
             message: `Failed get transaction! [Errors]:${result.error.issues.map(
-              (item) => ` ${item.path[0]} ${item.message}`,
+              (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
-          400,
+          400
         );
       }
     }),
@@ -45,8 +45,8 @@ transactionRoutes
             category ? eq(transactionsTable.category, category) : undefined,
             date_start && date_end
               ? between(transactionsTable.date, date_start, date_end)
-              : undefined,
-          ),
+              : undefined
+          )
         )
         .limit(200); // max transaction record per month is around 150ish
 
@@ -55,7 +55,7 @@ transactionRoutes
         message: "Success!",
         data: transactions,
       });
-    },
+    }
   )
   .post(
     "/create",
@@ -65,10 +65,10 @@ transactionRoutes
           {
             status: 400,
             message: `Failed record transaction! [Errors]:${result.error.issues.map(
-              (item) => ` ${item.path[0]} ${item.message}`,
+              (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
-          400,
+          400
         );
       }
     }),
@@ -96,8 +96,31 @@ transactionRoutes
         messsage: "Success create transaction!",
         data: res,
       });
-    },
+    }
   )
+  .get("/:id{[0-9]+}", async (c) => {
+    const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+    const id = Number.parseInt(c.req.param("id"));
+
+    const transactions = await db
+      .select()
+      .from(transactionsTable)
+      .orderBy(asc(transactionsTable.date), asc(transactionsTable.id))
+      .where(
+        and(
+          eq(transactionsTable.user_id, jwtPayload.sub),
+          eq(transactionsTable.is_active, true),
+          eq(transactionsTable.id, id)
+        )
+      )
+      .then((res) => res[0]);
+
+    return c.json({
+      status: 200,
+      message: "Success!",
+      data: transactions,
+    });
+  })
   .put(
     "/:id{[0-9]+}",
     zValidator("json", transactionValidation, (result, c) => {
@@ -106,10 +129,10 @@ transactionRoutes
           {
             status: 400,
             message: `Failed update transaction! [Errors - query params]:${result.error.issues.map(
-              (item) => ` ${item.path[0]} ${item.message}`,
+              (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
-          400,
+          400
         );
       }
     }),
@@ -125,8 +148,8 @@ transactionRoutes
           and(
             eq(transactionsTable.user_id, jwtPayload.sub),
             eq(transactionsTable.id, id),
-            eq(transactionsTable.is_active, true),
-          ),
+            eq(transactionsTable.is_active, true)
+          )
         );
 
       if (existingTransaction.length < 1) {
@@ -146,8 +169,8 @@ transactionRoutes
         .where(
           and(
             eq(transactionsTable.user_id, jwtPayload.sub),
-            eq(transactionsTable.id, id),
-          ),
+            eq(transactionsTable.id, id)
+          )
         )
         .returning()
         .then((res) => res[0]);
@@ -157,7 +180,7 @@ transactionRoutes
         message: "Success update transaction!",
         data: updatedTransaction,
       });
-    },
+    }
   )
   .delete("/:id{[0-9]+}", async (c) => {
     const id = Number.parseInt(c.req.param("id"));
@@ -170,8 +193,8 @@ transactionRoutes
         and(
           eq(transactionsTable.user_id, jwtPayload.sub),
           eq(transactionsTable.id, id),
-          eq(transactionsTable.is_active, true),
-        ),
+          eq(transactionsTable.is_active, true)
+        )
       );
 
     if (existingTransaction.length < 1) {
@@ -187,8 +210,8 @@ transactionRoutes
       .where(
         and(
           eq(transactionsTable.user_id, jwtPayload.sub),
-          eq(transactionsTable.id, id),
-        ),
+          eq(transactionsTable.id, id)
+        )
       )
       .returning()
       .then((res) => res[0]);
@@ -207,10 +230,10 @@ transactionRoutes
           {
             status: 400,
             message: `Failed get transaction - monthly summary! [Errors - query params]:${result.error.issues.map(
-              (item) => ` ${item.path[0]} ${item.message}`,
+              (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
-          400,
+          400
         );
       }
     }),
@@ -231,8 +254,8 @@ transactionRoutes
             eq(transactionsTable.is_active, true),
             date_start && date_end
               ? between(transactionsTable.date, date_start, date_end)
-              : undefined,
-          ),
+              : undefined
+          )
         )
         .groupBy(transactionsTable.category);
 
@@ -248,8 +271,8 @@ transactionRoutes
             eq(transactionsTable.is_active, true),
             date_start && date_end
               ? between(transactionsTable.date, date_start, date_end)
-              : undefined,
-          ),
+              : undefined
+          )
         )
         .groupBy(transactionsTable.type);
 
@@ -258,7 +281,7 @@ transactionRoutes
           acc[item.type] = item.amount;
           return acc;
         },
-        { inflow: 0, outflow: 0 },
+        { inflow: 0, outflow: 0 }
       );
 
       return c.json({
@@ -269,5 +292,5 @@ transactionRoutes
           summary: monthlySummary,
         },
       });
-    },
+    }
   );
