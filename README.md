@@ -10,7 +10,8 @@ personal financial tracker tools. input cashflow, show cashflow on table. tools 
   - [x] get user
 - [x] transactions
   - [x] input cashflow: amount, date, category, notes
-  - [ ] edit cashflow: amount, category, notes
+  - [x] edit cashflow by id: amount, category, notes
+  - [x] delete cashflow by id
   - [x] get cashflow: by date, by month
   - [ ] get outflow, inflow: by month, by category, by quarter
 - [ ] advance
