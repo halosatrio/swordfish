@@ -4,6 +4,7 @@ import { authRoutes } from "@routes/auth";
 import { transactionRoutes } from "@routes/transaction";
 import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
+import { reportRoutes } from "@routes/report";
 
 const app = new Hono();
 
@@ -24,9 +25,9 @@ app.use(
 app
   .basePath("/v1")
   .route("/auth", authRoutes)
-  .route("/transaction", transactionRoutes);
+  .route("/transaction", transactionRoutes)
+  .route("/report", reportRoutes);
 // TODO:
-// report Routes
 // assets Routes
 
 app.get("/v1/test", (c) => {
