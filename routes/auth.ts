@@ -101,9 +101,13 @@ export const authRoutes = new Hono()
         if (isMatch) {
           return c.json({ status: 200, message: "Success!", data: token });
         } else {
-          return c.json({ status: 500, data: "password is incorrect!" }, 500);
+          return c.json(
+            { status: 500, message: "password is incorrect!" },
+            500
+          );
         }
-      } else c.json({ status: 500, data: "email is not found!" }, 500);
+      } else
+        return c.json({ status: 500, message: "email is not found!" }, 500);
     }
   )
   .get("/user", jwtMiddleware, async (c) => {
