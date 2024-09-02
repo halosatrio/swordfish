@@ -57,7 +57,7 @@ export const reportRoutes = new Hono();
 reportRoutes.use(jwtMiddleware);
 
 reportRoutes.get(
-  "/essentials/quarter",
+  "/quarter/essentials",
   zValidator("query", quarterReportQuerySchema, (result, c) => {
     if (!result.success) {
       return c.json(
@@ -108,7 +108,7 @@ reportRoutes.get(
 );
 
 reportRoutes.get(
-  "/non-essentials/quarter",
+  "/quarter/non-essentials",
   zValidator("query", quarterReportQuerySchema, (result, c) => {
     if (!result.success) {
       return c.json(
@@ -159,7 +159,7 @@ reportRoutes.get(
 );
 
 reportRoutes.get(
-  "/shopping/quarter",
+  "/quarter/shopping",
   zValidator("query", quarterReportQuerySchema, (result, c) => {
     if (!result.success) {
       return c.json(
