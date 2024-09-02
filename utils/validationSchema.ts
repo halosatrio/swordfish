@@ -5,9 +5,7 @@ import { z } from "zod";
 export const userValidationSchema = z.object({
   username: z.string(),
   email: z.string().email(),
-  password: z
-    .string()
-    .min(6, { message: "Password must contain at least 6 character(s)" }),
+  password: z.string().min(6, { message: "Password must contain at least 6 character(s)" }),
 });
 
 export const loginUserValidation = userValidationSchema.omit({
@@ -40,5 +38,11 @@ export const quarterReportQuerySchema = z
   .object({
     year: z.string(),
     q: z.string(),
+  })
+  .required();
+
+export const annualReportQuerySchema = z
+  .object({
+    year: z.string(),
   })
   .required();

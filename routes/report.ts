@@ -3,7 +3,7 @@ import { transactionsTable } from "@db/schema";
 import { zValidator } from "@hono/zod-validator";
 import type { JwtPayloadType } from "@lib/common";
 import { jwtMiddleware } from "@utils/jwtMiddleware";
-import { quarterReportQuerySchema } from "@utils/validationSchema";
+import { annualReportQuerySchema, quarterReportQuerySchema } from "@utils/validationSchema";
 import dayjs from "dayjs";
 import { and, between, eq, inArray, sql } from "drizzle-orm";
 import { Hono } from "hono";
@@ -14,6 +14,20 @@ const QUARTER_MONTH: { [key: string]: string[] } = {
   "3": ["july", "august", "september"],
   "4": ["october", "november", "december"],
 };
+const MONTHS: string[] = [
+  "january",
+  "february",
+  "march",
+  "april",
+  "may",
+  "june",
+  "july",
+  "august",
+  "september",
+  "october",
+  "november",
+  "december",
+];
 
 // extract/refactor recurring functions
 const getFirstDate = (year: string, q: string, month: number) =>
@@ -206,6 +220,98 @@ reportRoutes.get(
         quarterMonth2,
         quarterMonth3,
         quarterTotal,
+      },
+    });
+  }
+);
+
+reportRoutes.get(
+  "/annual",
+  zValidator("query", annualReportQuerySchema, (result, c) => {
+    if (!result.success) {
+      return c.json(
+        {
+          status: 400,
+          message: `Failed get report - quarter essentials  [Errors - query params]:${result.error.issues.map(
+            (item) => ` ${item.path[0]} ${item.message}`
+          )}`,
+        },
+        400
+      );
+    }
+  }),
+  async (c) => {
+    const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+
+    // catch error if query is not number
+    const { year } = c.req.query();
+    if (!parseInt(year)) {
+      return c.json({ status: 500, message: "Query 'year' is not a number!" }, 500);
+    }
+    // get first and last date
+    const getMonthFirstDate = (month: number) =>
+      dayjs(`${year} ${MONTHS[month]}`).startOf("month").format("YYYY-MM-DD");
+    const getMonthLastDate = (month: number) =>
+      dayjs(`${year} ${MONTHS[month]}`).endOf("month").format("YYYY-MM-DD");
+
+    const getAnnualReportPerMonthQuery = (start_date: string, end_date: string) =>
+      db
+        .select({
+          category: transactionsTable.category,
+          amount: sql<number>`cast(sum(${transactionsTable.amount}) as int)`,
+        })
+        .from(transactionsTable)
+        .where(
+          and(
+            eq(transactionsTable.user_id, jwtPayload.sub),
+            eq(transactionsTable.is_active, true),
+            start_date && end_date
+              ? between(transactionsTable.date, start_date, end_date)
+              : undefined
+          )
+        )
+        .groupBy(transactionsTable.category);
+
+    const annual1 = await getAnnualReportPerMonthQuery(getMonthFirstDate(0), getMonthLastDate(0));
+    const annual2 = await getAnnualReportPerMonthQuery(getMonthFirstDate(1), getMonthLastDate(1));
+    const annual3 = await getAnnualReportPerMonthQuery(getMonthFirstDate(2), getMonthLastDate(2));
+    const annual4 = await getAnnualReportPerMonthQuery(getMonthFirstDate(3), getMonthLastDate(3));
+    const annual5 = await getAnnualReportPerMonthQuery(getMonthFirstDate(4), getMonthLastDate(4));
+    const annual6 = await getAnnualReportPerMonthQuery(getMonthFirstDate(5), getMonthLastDate(5));
+    const annual7 = await getAnnualReportPerMonthQuery(getMonthFirstDate(6), getMonthLastDate(6));
+    const annual8 = await getAnnualReportPerMonthQuery(getMonthFirstDate(7), getMonthLastDate(7));
+    const annual9 = await getAnnualReportPerMonthQuery(getMonthFirstDate(8), getMonthLastDate(8));
+    const annual10 = await getAnnualReportPerMonthQuery(getMonthFirstDate(9), getMonthLastDate(9));
+    const annual11 = await getAnnualReportPerMonthQuery(
+      getMonthFirstDate(10),
+      getMonthLastDate(10)
+    );
+    const annual12 = await getAnnualReportPerMonthQuery(
+      getMonthFirstDate(11),
+      getMonthLastDate(11)
+    );
+    const annualTotal = await getAnnualReportPerMonthQuery(
+      getMonthFirstDate(0),
+      getMonthLastDate(11)
+    );
+
+    return c.json({
+      status: 200,
+      message: "Success!",
+      data: {
+        month1: annual1,
+        month2: annual2,
+        month3: annual3,
+        month4: annual4,
+        month5: annual5,
+        month6: annual6,
+        month7: annual7,
+        month8: annual8,
+        month9: annual9,
+        month10: annual10,
+        month11: annual11,
+        month12: annual12,
+        total: annualTotal,
       },
     });
   }
