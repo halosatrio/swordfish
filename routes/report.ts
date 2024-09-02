@@ -309,3 +309,88 @@ reportRoutes.get(
     });
   }
 );
+
+reportRoutes.get(
+  "/annual/cashflow",
+  zValidator("query", annualReportQuerySchema, (result, c) => {
+    if (!result.success) {
+      const errors = result.error.issues
+        .map((item) => `${item.path[0]} ${item.message}`)
+        .join(", ");
+      return c.json(
+        {
+          status: 400,
+          message: `Failed to get report - quarter essentials [Errors - query params]: ${errors}`,
+        },
+        400
+      );
+    }
+  }),
+  async (c) => {
+    const jwtPayload: JwtPayloadType = c.get("jwtPayload");
+    const { year } = c.req.query();
+
+    // Validate 'year' query parameter
+    const parsedYear = parseInt(year);
+    if (isNaN(parsedYear)) {
+      return c.json({ status: 500, message: "Query 'year' is not a number!" }, 500);
+    }
+
+    // Function to generate start and end dates for a given month
+    const getMonthDateRange = (month: number) => ({
+      start_date: dayjs(`${year} ${MONTHS[month]}`).startOf("month").format("YYYY-MM-DD"),
+      end_date: dayjs(`${year} ${MONTHS[month]}`).endOf("month").format("YYYY-MM-DD"),
+    });
+
+    // Function to get annual report for a given date range
+    const getAnnualReportPerMonthQuery = (start_date: string, end_date: string) =>
+      db
+        .select({
+          type: transactionsTable.type,
+          amount: sql<number>`cast(sum(${transactionsTable.amount}) as int)`,
+        })
+        .from(transactionsTable)
+        .where(
+          and(
+            eq(transactionsTable.user_id, jwtPayload.sub),
+            eq(transactionsTable.is_active, true),
+            between(transactionsTable.date, start_date, end_date)
+          )
+        )
+        .groupBy(transactionsTable.type);
+
+    // Get annual report data for each month
+    const monthlyReports = await Promise.all(
+      Array.from({ length: 12 }, (_, i) => {
+        const { start_date, end_date } = getMonthDateRange(i);
+        return getAnnualReportPerMonthQuery(start_date, end_date);
+      })
+    );
+
+    // Get the annual total
+    const annualTotal = await getAnnualReportPerMonthQuery(
+      dayjs(`${year}`).startOf("year").format("YYYY-MM-DD"),
+      dayjs(`${year}`).endOf("year").format("YYYY-MM-DD")
+    );
+
+    return c.json({
+      status: 200,
+      message: "Success!",
+      data: {
+        month1: monthlyReports[0],
+        month2: monthlyReports[1],
+        month3: monthlyReports[2],
+        month4: monthlyReports[3],
+        month5: monthlyReports[4],
+        month6: monthlyReports[5],
+        month7: monthlyReports[6],
+        month8: monthlyReports[7],
+        month9: monthlyReports[8],
+        month10: monthlyReports[9],
+        month11: monthlyReports[10],
+        month12: monthlyReports[11],
+        total: annualTotal,
+      },
+    });
+  }
+);
