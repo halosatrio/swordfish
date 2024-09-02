@@ -229,12 +229,13 @@ reportRoutes.get(
   "/annual",
   zValidator("query", annualReportQuerySchema, (result, c) => {
     if (!result.success) {
+      const errors = result.error.issues
+        .map((item) => `${item.path[0]} ${item.message}`)
+        .join(", ");
       return c.json(
         {
           status: 400,
-          message: `Failed get report - quarter essentials  [Errors - query params]:${result.error.issues.map(
-            (item) => ` ${item.path[0]} ${item.message}`
-          )}`,
+          message: `Failed to get report - quarter essentials [Errors - query params]: ${errors}`,
         },
         400
       );
@@ -242,18 +243,21 @@ reportRoutes.get(
   }),
   async (c) => {
     const jwtPayload: JwtPayloadType = c.get("jwtPayload");
-
-    // catch error if query is not number
     const { year } = c.req.query();
-    if (!parseInt(year)) {
+
+    // Validate 'year' query parameter
+    const parsedYear = parseInt(year);
+    if (isNaN(parsedYear)) {
       return c.json({ status: 500, message: "Query 'year' is not a number!" }, 500);
     }
-    // get first and last date
-    const getMonthFirstDate = (month: number) =>
-      dayjs(`${year} ${MONTHS[month]}`).startOf("month").format("YYYY-MM-DD");
-    const getMonthLastDate = (month: number) =>
-      dayjs(`${year} ${MONTHS[month]}`).endOf("month").format("YYYY-MM-DD");
 
+    // Function to generate start and end dates for a given month
+    const getMonthDateRange = (month: number) => ({
+      start_date: dayjs(`${year} ${MONTHS[month]}`).startOf("month").format("YYYY-MM-DD"),
+      end_date: dayjs(`${year} ${MONTHS[month]}`).endOf("month").format("YYYY-MM-DD"),
+    });
+
+    // Function to get annual report for a given date range
     const getAnnualReportPerMonthQuery = (start_date: string, end_date: string) =>
       db
         .select({
@@ -265,52 +269,41 @@ reportRoutes.get(
           and(
             eq(transactionsTable.user_id, jwtPayload.sub),
             eq(transactionsTable.is_active, true),
-            start_date && end_date
-              ? between(transactionsTable.date, start_date, end_date)
-              : undefined
+            between(transactionsTable.date, start_date, end_date)
           )
         )
         .groupBy(transactionsTable.category);
 
-    const annual1 = await getAnnualReportPerMonthQuery(getMonthFirstDate(0), getMonthLastDate(0));
-    const annual2 = await getAnnualReportPerMonthQuery(getMonthFirstDate(1), getMonthLastDate(1));
-    const annual3 = await getAnnualReportPerMonthQuery(getMonthFirstDate(2), getMonthLastDate(2));
-    const annual4 = await getAnnualReportPerMonthQuery(getMonthFirstDate(3), getMonthLastDate(3));
-    const annual5 = await getAnnualReportPerMonthQuery(getMonthFirstDate(4), getMonthLastDate(4));
-    const annual6 = await getAnnualReportPerMonthQuery(getMonthFirstDate(5), getMonthLastDate(5));
-    const annual7 = await getAnnualReportPerMonthQuery(getMonthFirstDate(6), getMonthLastDate(6));
-    const annual8 = await getAnnualReportPerMonthQuery(getMonthFirstDate(7), getMonthLastDate(7));
-    const annual9 = await getAnnualReportPerMonthQuery(getMonthFirstDate(8), getMonthLastDate(8));
-    const annual10 = await getAnnualReportPerMonthQuery(getMonthFirstDate(9), getMonthLastDate(9));
-    const annual11 = await getAnnualReportPerMonthQuery(
-      getMonthFirstDate(10),
-      getMonthLastDate(10)
+    // Get annual report data for each month
+    const monthlyReports = await Promise.all(
+      Array.from({ length: 12 }, (_, i) => {
+        const { start_date, end_date } = getMonthDateRange(i);
+        return getAnnualReportPerMonthQuery(start_date, end_date);
+      })
     );
-    const annual12 = await getAnnualReportPerMonthQuery(
-      getMonthFirstDate(11),
-      getMonthLastDate(11)
-    );
+
+    // Get the annual total
     const annualTotal = await getAnnualReportPerMonthQuery(
-      getMonthFirstDate(0),
-      getMonthLastDate(11)
+      dayjs(`${year}`).startOf("year").format("YYYY-MM-DD"),
+      dayjs(`${year}`).endOf("year").format("YYYY-MM-DD")
     );
 
     return c.json({
       status: 200,
       message: "Success!",
       data: {
-        month1: annual1,
-        month2: annual2,
-        month3: annual3,
-        month4: annual4,
-        month5: annual5,
-        month6: annual6,
-        month7: annual7,
-        month8: annual8,
-        month9: annual9,
-        month10: annual10,
-        month11: annual11,
-        month12: annual12,
+        month1: monthlyReports[0],
+        month2: monthlyReports[1],
+        month3: monthlyReports[2],
+        month4: monthlyReports[3],
+        month5: monthlyReports[4],
+        month6: monthlyReports[5],
+        month7: monthlyReports[6],
+        month8: monthlyReports[7],
+        month9: monthlyReports[8],
+        month10: monthlyReports[9],
+        month11: monthlyReports[10],
+        month12: monthlyReports[11],
         total: annualTotal,
       },
     });
