@@ -50,7 +50,7 @@ open http://localhost:3000
 
 if we make some changes in schema:
 
-- generate with `bunx drizzle-kit generate:pg`
+- generate with `bunx drizzle-kit generate`
 - migrate with `bun migrate.ts`
 
 ## Running Docker

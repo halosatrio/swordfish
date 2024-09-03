@@ -46,3 +46,10 @@ export const annualReportQuerySchema = z
     year: z.string(),
   })
   .required();
+
+export const assetValidationSchema = z.object({
+  account: z.enum(["BCA", "BLU", "BIBIT"]), // hardcoded accounts can be changed into dynamic
+  amount: z.number().positive(),
+  date: z.string().date(),
+  notes: z.string().optional(),
+});
