@@ -333,61 +333,40 @@ reportRoutes
         return c.json({ status: 500, message: "Query 'year' is not a number!" }, 500);
       }
 
-      // Function to generate start and end dates for a given month
-      const getMonthDateRange = (month: number) => ({
-        start_date: dayjs(`${year} ${MONTHS[month]}`).startOf("month").format("YYYY-MM-DD"),
-        end_date: dayjs(`${year} ${MONTHS[month]}`).endOf("month").format("YYYY-MM-DD"),
-      });
+      const start_date = dayjs(`${year}`).startOf("year").format("YYYY-MM-DD");
+      const end_date = dayjs(`${year}`).endOf("year").format("YYYY-MM-DD");
 
-      // Function to get annual report for a given date range
-      const getAnnualReportPerMonthQuery = (start_date: string, end_date: string) =>
-        db
-          .select({
-            type: transactionsTable.type,
-            amount: sql<number>`cast(sum(${transactionsTable.amount}) as int)`,
-          })
-          .from(transactionsTable)
-          .where(
-            and(
-              eq(transactionsTable.user_id, jwtPayload.sub),
-              eq(transactionsTable.is_active, true),
-              between(transactionsTable.date, start_date, end_date)
-            )
-          )
-          .groupBy(transactionsTable.type);
-
-      // Get annual report data for each month
-      const monthlyReports = await Promise.all(
-        Array.from({ length: 12 }, (_, i) => {
-          const { start_date, end_date } = getMonthDateRange(i);
-          return getAnnualReportPerMonthQuery(start_date, end_date);
-        })
+      const res = await db.execute(
+        sql`select
+          extract(month from date) as month,
+          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as total_inflow,
+          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as total_outflow
+          from ${transactionsTable}
+          where
+            ${transactionsTable.user_id} = ${jwtPayload.sub} and
+            ${transactionsTable.is_active} = true and
+            ${transactionsTable.date} between ${start_date} and ${end_date}
+          group by month
+          order by month
+        `
       );
 
-      // Get the annual total
-      const annualTotal = await getAnnualReportPerMonthQuery(
-        dayjs(`${year}`).startOf("year").format("YYYY-MM-DD"),
-        dayjs(`${year}`).endOf("year").format("YYYY-MM-DD")
+      const resTotal = await db.execute(
+        sql`select
+          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as total_inflow,
+          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as total_outflow
+          from ${transactionsTable}
+          where
+            ${transactionsTable.user_id} = ${jwtPayload.sub} and
+            ${transactionsTable.is_active} = true and
+            ${transactionsTable.date} between ${start_date} and ${end_date}
+        `
       );
 
       return c.json({
         status: 200,
         message: "Success!",
-        data: {
-          month1: monthlyReports[0],
-          month2: monthlyReports[1],
-          month3: monthlyReports[2],
-          month4: monthlyReports[3],
-          month5: monthlyReports[4],
-          month6: monthlyReports[5],
-          month7: monthlyReports[6],
-          month8: monthlyReports[7],
-          month9: monthlyReports[8],
-          month10: monthlyReports[9],
-          month11: monthlyReports[10],
-          month12: monthlyReports[11],
-          total: annualTotal,
-        },
+        data: { monthly: res, total: resTotal[0] },
       });
     }
   );
