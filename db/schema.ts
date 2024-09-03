@@ -1,13 +1,4 @@
-import {
-  text,
-  timestamp,
-  date,
-  pgSchema,
-  serial,
-  numeric,
-  integer,
-  boolean,
-} from "drizzle-orm/pg-core";
+import { text, timestamp, date, pgSchema, serial, integer, boolean } from "drizzle-orm/pg-core";
 
 export const mySchema = pgSchema("swordfish");
 
@@ -31,6 +22,19 @@ export const transactionsTable = mySchema.table("transactions", {
   date: date("date").notNull(),
   notes: text("notes"),
   is_active: boolean("is_active").default(true),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const assetsTable = mySchema.table("assets", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id")
+    .references(() => usersTable.id)
+    .notNull(),
+  account: text("account").notNull(), // BCA, BLU, BIBIT
+  amount: integer("amount").notNull(),
+  date: date("date").notNull(),
+  notes: text("notes"),
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),
 });
