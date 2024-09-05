@@ -52,6 +52,26 @@ const getQuarterQuery = (jwt: JwtPayloadType, date1: string, date2: string, cate
     )
     .groupBy(transactionsTable.category);
 
+// function to check category in non-essentials is present in payload
+const checkCategory = (resQuery: any[], categories: string[]) => {
+  if (resQuery.length === 0) {
+    return categories.map((item) => ({
+      category: item,
+      amount: 0,
+    }));
+  } else {
+    const reportCategories = resQuery.map((item) => item.category);
+
+    // Finding the nonEssentials that don't appear in reportCategories and creating the missing objects
+    const missingItems = categories
+      .filter((item) => !reportCategories.includes(item))
+      .map((missingCategory) => ({ category: missingCategory, amount: 0 }));
+
+    // Combining the existing month1 array with the missing items
+    return [...resQuery, ...missingItems];
+  }
+};
+
 // start Route Functions
 export const reportRoutes = new Hono();
 reportRoutes.use(jwtMiddleware);
@@ -90,19 +110,19 @@ reportRoutes
       let month3: string[] = [getFirstDate(year, q, 2), getLastDate(year, q, 2)];
       const essentials = ["makan", "cafe", "utils", "errand", "bensin", "olahraga"];
 
-      const quarterMonth1 = await getQuarterQuery(jwtPayload, month1[0], month1[1], essentials);
-      const quarterMonth2 = await getQuarterQuery(jwtPayload, month2[0], month2[1], essentials);
-      const quarterMonth3 = await getQuarterQuery(jwtPayload, month3[0], month3[1], essentials);
-      const quarterTotal = await getQuarterQuery(jwtPayload, month1[0], month3[1], essentials);
+      const resMonth1 = await getQuarterQuery(jwtPayload, month1[0], month1[1], essentials);
+      const resMonth2 = await getQuarterQuery(jwtPayload, month2[0], month2[1], essentials);
+      const resMonth3 = await getQuarterQuery(jwtPayload, month3[0], month3[1], essentials);
+      const resTotal = await getQuarterQuery(jwtPayload, month1[0], month3[1], essentials);
 
       return c.json({
         status: 200,
         message: "Success!",
         data: {
-          quarterMonth1,
-          quarterMonth2,
-          quarterMonth3,
-          quarterTotal,
+          month1: checkCategory(resMonth1, essentials),
+          month2: checkCategory(resMonth2, essentials),
+          month3: checkCategory(resMonth3, essentials),
+          total: checkCategory(resTotal, essentials),
         },
       });
     }
@@ -138,21 +158,19 @@ reportRoutes
       let month1: string[] = [getFirstDate(year, q, 0), getLastDate(year, q, 0)];
       let month2: string[] = [getFirstDate(year, q, 1), getLastDate(year, q, 1)];
       let month3: string[] = [getFirstDate(year, q, 2), getLastDate(year, q, 2)];
-      const nonEssentials = ["family", "misc", "transport", "traveling", "date", "healthcare"];
+      const nonEssentials = ["misc", "family", "transport", "traveling", "healthcare", "date"];
 
-      const quarterMonth1 = await getQuarterQuery(jwtPayload, month1[0], month1[1], nonEssentials);
-      const quarterMonth2 = await getQuarterQuery(jwtPayload, month2[0], month2[1], nonEssentials);
-      const quarterMonth3 = await getQuarterQuery(jwtPayload, month3[0], month3[1], nonEssentials);
-      const quarterTotal = await getQuarterQuery(jwtPayload, month1[0], month3[1], nonEssentials);
+      const resMonth1 = await getQuarterQuery(jwtPayload, month1[0], month1[1], nonEssentials);
+      const resMonth2 = await getQuarterQuery(jwtPayload, month2[0], month2[1], nonEssentials);
+      const resMonth3 = await getQuarterQuery(jwtPayload, month3[0], month3[1], nonEssentials);
 
       return c.json({
         status: 200,
         message: "Success!",
         data: {
-          quarterMonth1,
-          quarterMonth2,
-          quarterMonth3,
-          quarterTotal,
+          month1: checkCategory(resMonth1, nonEssentials),
+          month2: checkCategory(resMonth2, nonEssentials),
+          month3: checkCategory(resMonth3, nonEssentials),
         },
       });
     }
@@ -206,19 +224,17 @@ reportRoutes
       let month2: string[] = [getFirstDate(year, q, 1), getLastDate(year, q, 1)];
       let month3: string[] = [getFirstDate(year, q, 2), getLastDate(year, q, 2)];
 
-      const quarterMonth1 = await getQuarterQuery(month1[0], month1[1]);
-      const quarterMonth2 = await getQuarterQuery(month2[0], month2[1]);
-      const quarterMonth3 = await getQuarterQuery(month3[0], month3[1]);
-      const quarterTotal = await getQuarterQuery(month1[0], month3[1]);
+      const resMonth1 = await getQuarterQuery(month1[0], month1[1]);
+      const resMonth2 = await getQuarterQuery(month2[0], month2[1]);
+      const resMonth3 = await getQuarterQuery(month3[0], month3[1]);
 
       return c.json({
         status: 200,
         message: "Success!",
         data: {
-          quarterMonth1,
-          quarterMonth2,
-          quarterMonth3,
-          quarterTotal,
+          month1: resMonth1.length !== 0 ? resMonth1[0].amount : 0,
+          month2: resMonth2.length !== 0 ? resMonth2[0].amount : 0,
+          month3: resMonth3.length !== 0 ? resMonth3[0].amount : 0,
         },
       });
     }
