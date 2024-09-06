@@ -113,7 +113,6 @@ reportRoutes
       const resMonth1 = await getQuarterQuery(jwtPayload, month1[0], month1[1], essentials);
       const resMonth2 = await getQuarterQuery(jwtPayload, month2[0], month2[1], essentials);
       const resMonth3 = await getQuarterQuery(jwtPayload, month3[0], month3[1], essentials);
-      const resTotal = await getQuarterQuery(jwtPayload, month1[0], month3[1], essentials);
 
       return c.json({
         status: 200,
@@ -122,7 +121,6 @@ reportRoutes
           month1: checkCategory(resMonth1, essentials),
           month2: checkCategory(resMonth2, essentials),
           month3: checkCategory(resMonth3, essentials),
-          total: checkCategory(resTotal, essentials),
         },
       });
     }
@@ -379,10 +377,33 @@ reportRoutes
         `
       );
 
+      // function to expand empty month value
+      function expandToTwelveMonths(data: any[]) {
+        // Create an object to easily access existing data by month
+        const dataByMonth = data.reduce((acc, item) => {
+          acc[item.month] = item;
+          return acc;
+        }, {});
+
+        // Create the full 12-month array
+        const fullYearData = Array.from({ length: 12 }, (_, i) => {
+          const month = String(i + 1);
+          return (
+            dataByMonth[month] || {
+              month,
+              total_inflow: 0,
+              total_outflow: 0,
+            }
+          );
+        });
+
+        return fullYearData;
+      }
+
       return c.json({
         status: 200,
         message: "Success!",
-        data: { monthly: res, total: resTotal[0] },
+        data: { monthly: expandToTwelveMonths(res), total: resTotal[0] },
       });
     }
   );
