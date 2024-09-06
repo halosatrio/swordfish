@@ -16,7 +16,9 @@ personal financial tracker tools. input cashflow, show cashflow on table. tools 
   - [ ] get outflow, inflow: by month, by category, by quarter
 - [x] reports
   - [x] quarterly, annually, by category
-- [ ] assets
+- [x] assets
+  - [x] get assets
+  - [x] post record assets
 - [ ] advance
   - [ ] cookie based token
 
