@@ -352,9 +352,10 @@ reportRoutes
 
       const res = await db.execute(
         sql`select
-          extract(month from date) as month,
-          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as total_inflow,
-          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as total_outflow
+          cast(extract(month from date) as int) as month,
+          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as inflow,
+          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as outflow,
+          cast(SUM(CASE WHEN type = 'inflow' THEN amount ELSE 0 END) - SUM(CASE WHEN type = 'outflow' THEN amount ELSE 0 END) as int) AS saving
           from ${transactionsTable}
           where
             ${transactionsTable.user_id} = ${jwtPayload.sub} and
@@ -367,8 +368,8 @@ reportRoutes
 
       const resTotal = await db.execute(
         sql`select
-          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as total_inflow,
-          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as total_outflow
+          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as inflow,
+          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as outflow
           from ${transactionsTable}
           where
             ${transactionsTable.user_id} = ${jwtPayload.sub} and
@@ -387,12 +388,13 @@ reportRoutes
 
         // Create the full 12-month array
         const fullYearData = Array.from({ length: 12 }, (_, i) => {
-          const month = String(i + 1);
+          const month = i + 1;
           return (
             dataByMonth[month] || {
               month,
               total_inflow: 0,
               total_outflow: 0,
+              saving: 0,
             }
           );
         });
