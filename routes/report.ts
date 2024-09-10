@@ -392,8 +392,8 @@ reportRoutes
           return (
             dataByMonth[month] || {
               month,
-              total_inflow: 0,
-              total_outflow: 0,
+              inflow: 0,
+              outflow: 0,
               saving: 0,
             }
           );
