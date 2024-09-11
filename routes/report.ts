@@ -368,8 +368,9 @@ reportRoutes
 
       const resTotal = await db.execute(
         sql`select
-          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as inflow,
-          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as outflow
+          cast(sum(case when type = 'inflow' then amount else 0 end) as int) as total_inflow,
+          cast(sum(case when type = 'outflow' then amount else 0 end) as int) as total_outflow,
+          cast(sum(case when type = 'inflow' then amount else 0 end) - sum(case when type = 'outflow' then amount else 0 end) as int) as total_saving
           from ${transactionsTable}
           where
             ${transactionsTable.user_id} = ${jwtPayload.sub} and
