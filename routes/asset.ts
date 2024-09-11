@@ -11,8 +11,7 @@ export const assetRoutes = new Hono();
 assetRoutes.use(jwtMiddleware);
 
 // TODO:
-// get assets
-// post records assets
+// limit get asset
 
 assetRoutes
   .get("/", async (c) => {
