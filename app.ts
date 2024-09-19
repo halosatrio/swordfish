@@ -13,13 +13,13 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "http://localhost:8080", "dinero.bayubit.com"],
   })
 );
 app.use(
   "*",
   csrf({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "http://localhost:8080", "dinero.bayubit.com"],
   })
 );
 
