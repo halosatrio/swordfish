@@ -1,10 +1,17 @@
-FROM oven/bun
+FROM oven/bun:1 AS base
+WORKDIR /usr/src/app
 
-COPY bun.lockb .
-COPY package.json .
+# Copy only the files needed for installation
+COPY package.json bun.lockb ./
 
-RUN bun install --frozen-lockfile
+# Install dependencies
+RUN bun install --frozen-lockfile --production
 
+# Copy the rest of the application
 COPY . .
 
-CMD [ "bun", "index.ts" ]
+# Set the user to 'bun' for better security
+USER bun
+
+EXPOSE 8000
+CMD [ "bun", "run", "index.ts" ]
