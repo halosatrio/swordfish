@@ -6,10 +6,11 @@ import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { reportRoutes } from "@routes/report";
 import { assetRoutes } from "@routes/asset";
+import { customLogger } from "@utils/customLogger";
 
 const app = new Hono();
 
-app.use("*", logger());
+app.use("*", logger(customLogger));
 app.use(
   "*",
   cors({
