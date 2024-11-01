@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS base
+FROM oven/bun:1-alpine AS base
 WORKDIR /usr/src/app
 
 # Copy only the files needed for installation
@@ -40,4 +40,4 @@ CMD [ "bun", "run", "index.ts" ]
 # USER hono
 # EXPOSE 3000
 
-# CMD ["bun", "rn", "/app/dist/index.ts"]
+# CMD ["bun", "run", "/app/dist/index.ts"]
