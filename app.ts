@@ -1,16 +1,15 @@
 import { Hono } from "hono";
-import { logger } from "hono/logger";
 import { authRoutes } from "@routes/auth";
 import { transactionRoutes } from "@routes/transaction";
 import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { reportRoutes } from "@routes/report";
 import { assetRoutes } from "@routes/asset";
-import { customLogger } from "@utils/customLogger";
+import { pinoLogger } from "@utils/customLogger";
 
 const app = new Hono();
 
-app.use("*", logger(customLogger));
+app.use("*", pinoLogger());
 app.use(
   "*",
   cors({
