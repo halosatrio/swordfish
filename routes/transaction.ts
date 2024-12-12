@@ -153,7 +153,7 @@ transactionRoutes
         );
 
       if (existingTransaction.length < 1) {
-        return c.json({ status: 404, message: "Habit not found!" }, 404);
+        return c.json({ status: 404, message: "Transaction not found!" }, 404);
       }
 
       const updatedTransaction = await db
@@ -166,12 +166,7 @@ transactionRoutes
           notes: body.notes,
           updated_at: new Date(),
         })
-        .where(
-          and(
-            eq(transactionsTable.user_id, jwtPayload.sub),
-            eq(transactionsTable.id, id)
-          )
-        )
+        .where(and(eq(transactionsTable.user_id, jwtPayload.sub), eq(transactionsTable.id, id)))
         .returning()
         .then((res) => res[0]);
 
@@ -207,12 +202,7 @@ transactionRoutes
         is_active: false,
         updated_at: new Date(),
       })
-      .where(
-        and(
-          eq(transactionsTable.user_id, jwtPayload.sub),
-          eq(transactionsTable.id, id)
-        )
-      )
+      .where(and(eq(transactionsTable.user_id, jwtPayload.sub), eq(transactionsTable.id, id)))
       .returning()
       .then((res) => res[0]);
 
