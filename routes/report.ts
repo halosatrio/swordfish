@@ -132,7 +132,7 @@ reportRoutes
         return c.json(
           {
             status: 400,
-            message: `Failed get report - quarter essentials  [Errors - query params]:${result.error.issues.map(
+            message: `Failed get report - quarter non-essentials  [Errors - query params]:${result.error.issues.map(
               (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
@@ -180,7 +180,7 @@ reportRoutes
         return c.json(
           {
             status: 400,
-            message: `Failed get report - quarter essentials  [Errors - query params]:${result.error.issues.map(
+            message: `Failed get report - quarter shopping  [Errors - query params]:${result.error.issues.map(
               (item) => ` ${item.path[0]} ${item.message}`
             )}`,
           },
@@ -247,7 +247,7 @@ reportRoutes
         return c.json(
           {
             status: 400,
-            message: `Failed to get report - quarter essentials [Errors - query params]: ${errors}`,
+            message: `Failed to get report - annual [Errors - query params]: ${errors}`,
           },
           400
         );
@@ -331,7 +331,7 @@ reportRoutes
         return c.json(
           {
             status: 400,
-            message: `Failed to get report - quarter essentials [Errors - query params]: ${errors}`,
+            message: `Failed to get report - annual cashflow [Errors - query params]: ${errors}`,
           },
           400
         );
