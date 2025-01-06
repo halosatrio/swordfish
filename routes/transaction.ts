@@ -105,7 +105,6 @@ transactionRoutes
     const transactions = await db
       .select()
       .from(transactionsTable)
-      .orderBy(asc(transactionsTable.date), asc(transactionsTable.id))
       .where(
         and(
           eq(transactionsTable.user_id, jwtPayload.sub),
