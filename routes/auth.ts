@@ -84,30 +84,23 @@ export const authRoutes = new Hono()
         .where(eq(usersTable.email, body.email));
 
       if (user.length !== 0) {
-        const isMatch = await Bun.password.verify(
-          body.password,
-          user[0].password
-        );
-
-        // Generate JWT
-        const secret = process.env.SECRET_KEY;
-        const tokenPayload = {
-          sub: user[0].id,
-          email: body.email,
-          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // Token expires in 7 days
-        };
-        const token = await sign(tokenPayload, secret!);
+        const isMatch = await Bun.password.verify(body.password, user[0].password);
 
         if (isMatch) {
+          // Generate JWT
+          const secret = process.env.SECRET_KEY;
+          const tokenPayload = {
+            sub: user[0].id,
+            email: body.email,
+            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // Token expires in 7 days
+          };
+          const token = await sign(tokenPayload, secret!);
+
           return c.json({ status: 200, message: "Success!", data: token });
         } else {
-          return c.json(
-            { status: 500, message: "password is incorrect!" },
-            500
-          );
+          return c.json({ status: 401, message: "password or email is incorrect!" }, 401);
         }
-      } else
-        return c.json({ status: 500, message: "email is not found!" }, 500);
+      } else return c.json({ status: 401, message: "password or email is incorrect!" }, 401);
     }
   )
   .get("/user", jwtMiddleware, async (c) => {
